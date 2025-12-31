@@ -593,14 +593,20 @@
         topCard = cards[0];
 
         function openGift() {
-            triggerConfetti();
-            switchScene('scene-3');
+            console.log('openGift() called');
+            try {
+                triggerConfetti();
+                switchScene('scene-3');
+            } catch (err) { console.error('openGift error', err); }
         }
 
         // --- 5. Scene 3: Claim Ticket ---
         function claimTicket() {
-            switchScene('scene-4');
-            loadPhoto(0);
+            console.log('claimTicket() called');
+            try {
+                switchScene('scene-4');
+                loadPhoto(0);
+            } catch (err) { console.error('claimTicket error', err); }
         }
 
         // --- 6. Scene 4: Gallery ---
