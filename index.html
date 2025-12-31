@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A New Year Surprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Great+Vibes&family=Montserrat:wght@300;500;700&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --gold-dark: #B8860B;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --bg-deep: #050505;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            touch-action: none;
+        }
+
+        /* --- Background --- */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+        }
+
+        /* --- Scene Layout --- */
+        .scene {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.8s ease;
+            z-index: 10; padding: 20px;
+        }
+        .scene.active { opacity: 1; pointer-events: all; }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+            text-align: center; margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            z-index: 20;
+        }
+        .gold-text {
+            background: linear-gradient(to bottom, #FFFACD 0%, var(--gold) 50%, var(--gold-dark) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
+        }
+
+        /* --- Scene 1: Intro --- */
+        .reactor-core {
+            width: 180px; height: 180px; border-radius: 50%;
+            position: relative; display: flex; justify-content: center; align-items: center;
+            cursor: pointer;
+        }
+        .reactor-fill {
+            position: absolute; width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(var(--gold) 0deg, transparent 0deg);
+            filter: blur(8px); opacity: 0.5; transition: background 0.1s linear;
+        }
+        .reactor-inner {
+            width: 140px; height: 140px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; z-index: 2;
+            backdrop-filter: blur(5px);
+        }
+        .pulse-icon { font-size: 3rem; animation: breathe 3s infinite ease-in-out; }
+        @keyframes breathe { 0%,100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 15px var(--gold); } }
+
+        /* --- Scene 2: SWIPE STACK --- */
+        .deck-container {
+            position: relative;
+            width: 300px;
+            height: 420px;
+            margin-top: 20px;
+        }
+
+        .swipe-card {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            cursor: grab;
+            touch-action: none; 
+            z-index: 1;
+        }
+
+        .swipe-card.gift {
+            background: linear-gradient(135deg, rgba(184, 134, 11, 0.2), rgba(255, 215, 0, 0.1));
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            z-index: 5;
+            cursor: pointer;
+        }
+
+        .card-icon { font-size: 4rem; margin-bottom: 15px; pointer-events: none; }
+        .card-title { font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.3rem; pointer-events: none; text-align: center; padding: 0 10px; }
+        
+        .swipe-hint {
+            margin-top: 100px;
+            font-size: 0.8rem; color: #aaa; text-align: center;
+            animation: pulseText 2s infinite;
+            pointer-events: none;
+        }
+        @keyframes pulseText { 50% { opacity: 0.5; } }
+
+        /* --- Scene 3: Ticket --- */
+        .ticket-wrapper { perspective: 1000px; }
+        .golden-ticket {
+            width: 320px; padding: 4px;
+            background: linear-gradient(135deg, #b8860b, #ffd700 25%, #b8860b 50%, #ffd700 75%, #b8860b);
+            border-radius: 12px; box-shadow: 0 0 0 2px #46330b, 0 20px 50px rgba(0,0,0,0.8);
+        }
+        .ticket-inner {
+            background: #fff8dc; color: #4a0404;
+            padding: 30px; border-radius: 8px; text-align: center;
+        }
+        .ticket-inner h3 { font-family: 'Great Vibes', cursive; font-size: 2.2rem; margin-bottom: 5px; color: #8b4513; }
+        .claim-btn {
+            margin-top: 15px; background: linear-gradient(to bottom, #c5a028, #8b6914);
+            color: #fff; border: 1px solid #ffd700; padding: 8px 20px;
+            font-family: 'Cinzel', serif; font-weight: 700; border-radius: 4px; cursor: pointer;
+        }
+
+        /* --- Scene 4: Gallery --- */
+        .polaroid-frame {
+            background: white; padding: 15px 15px 50px 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transform: rotate(-3deg); cursor: pointer; max-width: 280px;
+        }
+        .photo-display { width: 100%; aspect-ratio: 3/4; background: #000; overflow: hidden; }
+        .photo-img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
+        .photo-caption {
+            font-family: 'Great Vibes', cursive; color: #333; font-size: 1.5rem;
+            position: absolute; bottom: 10px; left: 0; width: 100%; text-align: center;
+        }
+
+        /* --- Scene 5: Final Card (CLEAN SECTIONS) --- */
+        .card-container-3d {
+            perspective: 2000px; width: 340px; height: 540px;
+        }
+        .card-obj {
+            position: relative; width: 100%; height: 100%;
+            text-align: center; transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d; box-shadow: 0 30px 60px rgba(0,0,0,0.6); border-radius: 12px;
+        }
+        .card-container-3d.flipped .card-obj { transform: rotateY(-180deg); }
+        
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            border-radius: 12px; overflow: hidden;
+        }
+        
+        /* Front Face */
+        .front-face {
+            background: #1a1a1a; background-image: url("https://www.transparenttextures.com/patterns/black-scales.png");
+            border: 4px solid var(--gold); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; cursor: pointer;
+        }
+        .front-text { font-family: 'Great Vibes', cursive; font-size: 3rem; background: linear-gradient(to bottom, #fff, #ddd); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Back Face */
+        .back-face {
+            background: #fdfbf7; color: #2c2c2c;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .letter-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/cream-paper.png");
+            position: absolute; top:0; left:0; width:100%; height:100%; opacity: 0.5; pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Container for the pages */
+        .pagination-wrapper {
+            position: relative;
+            width: 100%;
+            flex: 1; /* Fill height */
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        /* The Sections */
+        .inner-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 25px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically by default */
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            background: #fdfbf7; /* Slightly different background to define section */
+        }
+
+        /* SECTION 1: Cover Style */
+        #page-1 { 
+            transform: translateX(0); 
+            text-align: center;
+        }
+
+        /* SECTION 2: Letter Style (Starts from top) */
+        #page-2 { 
+            transform: translateX(100%); 
+            justify-content: flex-start; /* Align to top like a letter */
+            padding-top: 40px; /* Give room at top */
+        }
+
+        .section-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .handwriting {
+            font-family: 'Great Vibes', cursive; font-size: 1.3rem; line-height: 1.6;
+            color: #4a4a4a; text-align: center;
+            width: 100%;
+        }
+        
+        .exam-highlight {
+            font-size: 1.8rem; color: #d35400; display: block; margin: 20px 0; font-weight: bold;
+            text-decoration: underline; text-decoration-style: wavy;
+        }
+        .signature { margin-top: 30px; text-align: right; font-family: 'Cinzel', serif; font-weight: 700; color: #8e44ad; font-size: 1.1rem;}
+
+        /* Navigation Area */
+        .nav-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+            z-index: 10;
+        }
+        .nav-btn {
+            padding: 8px 20px;
+            background: var(--gold);
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .nav-btn:active { transform: scale(0.95); }
+
+        /* Footer Area (Close Button) */
+        .card-footer {
+            flex-shrink: 0; 
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid #ddd;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 20;
+        }
+        .close-btn {
+            background: #e11d48; color: white; border: none;
+            padding: 8px 20px; border-radius: 20px;
+            font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+            cursor: pointer;
+        }
+
+        /* Confetti */
+        canvas#confetti { pointer-events: none; position: fixed; top:0; left:0; z-index: 999; }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="confetti"></canvas>
+
+    <!-- SCENE 1 -->
+    <section id="scene-1" class="scene active">
+        <h2 class="gold-text">Before this year begins...</h2>
+        <div class="reactor-core" id="core-btn">
+            <div class="reactor-fill" id="fill-ring"></div>
+            <div class="reactor-inner">
+                <div class="pulse-icon">❄️</div>
+            </div>
+        </div>
+        <p style="margin-top: 1.5rem; color: #aaa; letter-spacing: 1px;">Tap & Hold to Activate</p>
+    </section>
+
+    <!-- SCENE 2: SWIPE STACK -->
+    <section id="scene-2" class="scene">
+        <h2 class="gold-text">Choose your path...</h2>
+        
+        <div class="deck-container" id="card-stack">
+            <div class="swipe-card" data-type="bad">
+                <div class="card-icon">🌧️</div>
+                <div class="card-title">Bad Days</div>
+            </div>
+            <div class="swipe-card" data-type="bad">
+                <div class="card-icon">💼</div>
+                <div class="card-title">Work</div>
+            </div>
+            <div class="swipe-card" data-type="bad">
+                <div class="card-icon">🤯</div>
+                <div class="card-title">Stress</div>
+            </div>
+            <div class="swipe-card" data-type="bad">
+                <div class="card-icon">📏</div>
+                <div class="card-title">Distance</div>
+            </div>
+            
+            <!-- THE GIFT -->
+            <div class="swipe-card gift" id="gift-card" onclick="openGift()">
+                <div class="card-icon">🎁</div>
+                <div class="card-title gold-text">Your Gift</div>
+            </div>
+        </div>
+
+        <div class="swipe-hint">
+            Hold & Drag to Swipe Away<br>↔️
+        </div>
+    </section>
+
+    <!-- SCENE 3 -->
+    <section id="scene-3" class="scene">
+        <h2 class="gold-text">Your Reward</h2>
+        <div class="ticket-wrapper">
+            <div class="golden-ticket">
+                <div class="ticket-inner">
+                    <h3>Golden Ticket</h3>
+                    <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 10px;">
+                        Unlimetted<br>Love & Smiles
+                    </div>
+                    <div style="font-size: 1.5rem; margin-bottom: 10px;">✨❤️✨</div>
+                    <button class="claim-btn" onclick="claimTicket()">Claim Ticket</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCENE 4 -->
+    <section id="scene-4" class="scene">
+        <h2 class="gold-text">Moments of this Year</h2>
+        <div class="polaroid-frame" onclick="nextMoment()">
+            <div class="photo-display">
+                <img src="" class="photo-img" id="gallery-img">
+            </div>
+            <div class="photo-caption" id="gallery-caption">Memory #1</div>
+        </div>
+        <p style="margin-top: 20px; color: #aaa;">Tap to view next</p>
+    </section>
+
+    <!-- SCENE 5: TWO SECTIONS -->
+    <section id="scene-5" class="scene">
+        <div class="card-container-3d" id="final-card-wrapper">
+            <div class="card-obj">
+                <!-- Front -->
+                <div class="card-face front-face" onclick="flipFinalCard()">
+                    <div style="width: 60px; height: 60px; border: 2px solid var(--gold); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                        <span style="font-size: 1.5rem;">🌟</span>
+                    </div>
+                    <div class="front-text">Happy<br>New Year</div>
+                    <div style="margin-top: 40px; font-size: 0.8rem; text-transform: uppercase; color: var(--gold); animation: pulseText 2s infinite;">Tap to Open</div>
+                </div>
+                
+                <!-- Back -->
+                <div class="card-face back-face">
+                    <div class="letter-texture"></div>
+                    
+                    <div class="pagination-wrapper">
+                        <!-- SECTION 1: NEW YEAR COVER -->
+                        <div class="inner-page" id="page-1">
+                            <div class="section-label">Section 1</div>
+                            <div class="handwriting">
+                                Dear Maam,
+                                <br><br>
+                                Wishing you a wonderful New Year!
+                                <br><br>
+                                May this year bring you magic, new opportunities, and endless joy. May you always smile.
+                            </div>
+                            <!-- Fixed Navigation Button at bottom of this section -->
+                            <div class="nav-area">
+                                <button class="nav-btn" onclick="showPage2()">Go to Exam Wishes ➡️</button>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: EXAM WISHES -->
+                        <div class="inner-page" id="page-2">
+                            <div class="section-label">Section 2</div>
+                            <div class="handwriting">
+                                <span class="exam-highlight">All the best for your exam!</span>
+                                <br><br>
+                                I know you have been preparing so hard. Trust yourself, trust your efforts, and stay calm. You are going to rock it!
+                                <br><br>
+                                Thank you for being such an amazing person.
+                                <div class="signature">
+                                    With Love,<br>Your Friend
+                                </div>
+                            </div>
+                            <!-- Fixed Navigation Button at bottom of this section -->
+                            <div class="nav-area">
+                                <button class="nav-btn" onclick="showPage1()">⬅️ Back</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <button class="close-btn" onclick="flipFinalCard()">Close Card</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // --- 1. Background Starfield ---
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        let width, height, stars = [];
+        function resizeBg() {
+            width = window.innerWidth; height = window.innerHeight;
+            bgCanvas.width = width; bgCanvas.height = height;
+            initStars();
+        }
+        function initStars() {
+            stars = [];
+            for(let i=0; i<150; i++) {
+                stars.push({
+                    x: Math.random() * width, y: Math.random() * height,
+                    size: Math.random() * 2, speed: Math.random() * 0.5 + 0.1, opacity: Math.random()
+                });
+            }
+        }
+        function drawStars() {
+            bgCtx.clearRect(0,0,width,height);
+            bgCtx.fillStyle = 'white';
+            stars.forEach(star => {
+                bgCtx.globalAlpha = star.opacity;
+                bgCtx.beginPath(); bgCtx.arc(star.x, star.y, star.size, 0, Math.PI*2); bgCtx.fill();
+                star.y -= star.speed; if(star.y < 0) star.y = height;
+                star.opacity += (Math.random() - 0.5) * 0.1;
+                if(star.opacity < 0) star.opacity = 0; if(star.opacity > 1) star.opacity = 1;
+            });
+            requestAnimationFrame(drawStars);
+        }
+        window.addEventListener('resize', resizeBg); resizeBg(); drawStars();
+
+        // --- 2. Scene Navigation ---
+        function switchScene(id) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- 3. Scene 1: Tap & Hold ---
+        const coreBtn = document.getElementById('core-btn');
+        const fillRing = document.getElementById('fill-ring');
+        let holdTimer, progress = 0, isHolding = false;
+
+        function startHold(e) { if(e.cancelable) e.preventDefault(); isHolding = true; progress = 0; fillRing.style.background = `conic-gradient(var(--gold) 0deg, transparent 0deg)`;
+            holdTimer = setInterval(() => {
+                if(!isHolding) return; progress += 2; fillRing.style.background = `conic-gradient(var(--gold) ${progress}deg, transparent ${progress}deg)`;
+                if(progress >= 360) { finishIntro(); }
+            }, 20);
+        }
+        function endHold() { isHolding = false; clearInterval(holdTimer); fillRing.style.background = `conic-gradient(var(--gold) 0deg, transparent 0deg)`; }
+        coreBtn.addEventListener('mousedown', startHold); coreBtn.addEventListener('touchstart', startHold);
+        coreBtn.addEventListener('mouseup', endHold); coreBtn.addEventListener('mouseleave', endHold); coreBtn.addEventListener('touchend', endHold);
+
+        function finishIntro() {
+            endHold(); triggerConfetti();
+            setTimeout(() => switchScene('scene-2'), 1000);
+        }
+
+        // --- 4. Scene 2: SWIPE DECK LOGIC ---
+        const stack = document.getElementById('card-stack');
+        const cards = Array.from(document.querySelectorAll('.swipe-card'));
+        
+        let topCard = cards[0];
+        let isDragging = false;
+        let startX = 0, currentX = 0, startY = 0, currentY = 0;
+
+        function initSwipeEvents(card) {
+            card.addEventListener('mousedown', dragStart);
+            card.addEventListener('touchstart', dragStart, {passive: false});
+        }
+
+        function dragStart(e) {
+            if(e.target.closest('.swipe-card').classList.contains('gift')) return;
+            
+            if(e.cancelable) e.preventDefault();
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('touchmove', dragMove, {passive: false});
+            document.addEventListener('touchend', dragEnd);
+        }
+
+        function dragMove(e) {
+            if (!isDragging) return;
+            if(e.cancelable) e.preventDefault(); 
+
+            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+
+            const diffX = currentX - startX;
+            const diffY = currentY - startY;
+            const rotate = diffX * 0.1; 
+
+            topCard.style.transform = `translate(${diffX}px, ${diffY}px) rotate(${rotate}deg)`;
+            topCard.style.transition = 'none';
+        }
+
+        function dragEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            document.removeEventListener('mousemove', dragMove);
+            document.removeEventListener('mouseup', dragEnd);
+            document.removeEventListener('touchmove', dragMove);
+            document.removeEventListener('touchend', dragEnd);
+
+            const diffX = currentX - startX;
+            const threshold = 100; 
+
+            if (Math.abs(diffX) > threshold) {
+                topCard.style.transition = 'transform 0.5s ease-out';
+                const direction = diffX > 0 ? 1 : -1;
+                topCard.style.transform = `translate(${direction * 1000}px, 0px) rotate(${direction * 45}deg)`;
+                
+                setTimeout(() => {
+                    topCard.style.display = 'none';
+                    topCard.removeEventListener('mousedown', dragStart);
+                    topCard.removeEventListener('touchstart', dragStart);
+                    
+                    const currentIndex = cards.indexOf(topCard);
+                    if (currentIndex < cards.length - 1) {
+                        topCard = cards[currentIndex + 1];
+                    }
+                }, 500);
+
+            } else {
+                topCard.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                topCard.style.transform = 'translate(0, 0) rotate(0)';
+            }
+        }
+
+        cards.forEach((card, index) => {
+            card.style.zIndex = cards.length - index;
+            initSwipeEvents(card);
+        });
+        topCard = cards[0];
+
+        function openGift() {
+            triggerConfetti();
+            switchScene('scene-3');
+        }
+
+        // --- 5. Scene 3: Claim Ticket ---
+        function claimTicket() {
+            switchScene('scene-4');
+            loadPhoto(0);
+        }
+
+        // --- 6. Scene 4: Gallery ---
+        const photos = [
+            { src: 'https://picsum.photos/seed/2024a/400/500', cap: 'New Beginning' },
+            { src: 'https://picsum.photos/seed/2024b/400/500', cap: 'Smiles Shared' },
+            { src: 'https://picsum.photos/seed/2024c/400/500', cap: 'Late Nights' },
+            { src: 'https://picsum.photos/seed/2024d/400/500', cap: 'Coffee Dates' },
+            { src: 'https://picsum.photos/seed/2024e/400/500', cap: 'Quiet Moments' },
+            { src: 'https://picsum.photos/seed/2024f/400/500', cap: 'Big Dreams' }
+        ];
+        let photoIndex = 0;
+        function loadPhoto(idx) {
+            const img = document.getElementById('gallery-img');
+            const cap = document.getElementById('gallery-caption');
+            img.style.opacity = 0;
+            setTimeout(() => {
+                img.src = photos[idx].src; cap.innerText = photos[idx].cap;
+                const rot = Math.random() * 6 - 3;
+                document.querySelector('.polaroid-frame').style.transform = `rotate(${rot}deg)`;
+                img.onload = () => { img.style.opacity = 1; };
+            }, 300);
+        }
+        function nextMoment() {
+            photoIndex++;
+            if(photoIndex >= photos.length) { triggerConfetti(); switchScene('scene-5'); } 
+            else { loadPhoto(photoIndex); }
+        }
+
+        // --- 7. Scene 5: PAGINATION ---
+        function showPage1() {
+            document.getElementById('page-1').style.transform = 'translateX(0)';
+            document.getElementById('page-2').style.transform = 'translateX(100%)';
+        }
+        function showPage2() {
+            document.getElementById('page-1').style.transform = 'translateX(-100%)';
+            document.getElementById('page-2').style.transform = 'translateX(0)';
+        }
+        function flipFinalCard() {
+            const cardWrapper = document.getElementById('final-card-wrapper');
+            cardWrapper.classList.toggle('flipped');
+            if(!cardWrapper.classList.contains('flipped')) {
+                showPage1(); // Reset to start
+            }
+            triggerConfetti();
+        }
+
+        // --- 8. Confetti ---
+        const confCanvas = document.getElementById('confetti');
+        const confCtx = confCanvas.getContext('2d');
+        let confParticles = [];
+        function resizeConf() { confCanvas.width = window.innerWidth; confCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeConf); resizeConf();
+
+        function triggerConfetti() {
+            const colors = ['#FFD700', '#FF4500', '#1E90FF', '#32CD32', '#FF1493'];
+            for(let i=0; i<100; i++) {
+                confParticles.push({
+                    x: window.innerWidth / 2, y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15 - 5,
+                    size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 100 + Math.random() * 50, gravity: 0.2
+                });
+            }
+            updateConfetti();
+        }
+        function updateConfetti() {
+            confCtx.clearRect(0,0,confCanvas.width, confCanvas.height);
+            for(let i=0; i<confParticles.length; i++) {
+                let p = confParticles[i];
+                p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life--;
+                confCtx.fillStyle = p.color; confCtx.fillRect(p.x, p.y, p.size, p.size);
+            }
+            confParticles = confParticles.filter(p => p.life > 0);
+            if(confParticles.length > 0) requestAnimationFrame(updateConfetti);
+        }
+
+    </script>
+</body>
+</html>
